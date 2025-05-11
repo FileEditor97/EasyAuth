@@ -22,8 +22,6 @@ public class TechnicalConfigV1 extends ConfigTemplate {
     @Deprecated
     public ArrayList<String> confirmedOnlinePlayers = new ArrayList<>();
     public transient boolean floodgateLoaded = false;
-    public transient boolean luckPermsLoaded = false;
-    public transient boolean vanishLoaded = false;
     public transient boolean permissionsLoaded = false;
 
     public TechnicalConfigV1() {
@@ -39,12 +37,6 @@ public class TechnicalConfigV1 extends ConfigTemplate {
         if (FabricLoader.getInstance().isModLoaded("floodgate")) {
             config.floodgateLoaded = true;
         }
-        if (FabricLoader.getInstance().isModLoaded("luckperms")) {
-            config.luckPermsLoaded = true;
-        }
-        if (FabricLoader.getInstance().isModLoaded("melius-vanish")) {
-            config.vanishLoaded = true;
-        }
         if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
             config.permissionsLoaded = true;
         }
@@ -58,12 +50,6 @@ public class TechnicalConfigV1 extends ConfigTemplate {
         }
         if (FabricLoader.getInstance().isModLoaded("floodgate")) {
             config.floodgateLoaded = true;
-        }
-        if (FabricLoader.getInstance().isModLoaded("luckperms")) {
-            config.luckPermsLoaded = true;
-        }
-        if (FabricLoader.getInstance().isModLoaded("melius-vanish")) {
-            config.vanishLoaded = true;
         }
         if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
             config.permissionsLoaded = true;

@@ -1,9 +1,9 @@
 package xyz.nikitacartes.easyauth.mixin;
 
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.server.filter.TextStream;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
@@ -24,15 +24,15 @@ public abstract class ServerPlayNetworkHandlerMixin {
     // Afaik we don't really care if this is cancelled before or after the validateMessage
     // In case the player is not allowed to send message anyway then doing it before should save resources
     @Inject(
-            method = "onChatMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;validateAcknowledgment(Lnet/minecraft/network/message/LastSeenMessageList$Acknowledgment;)Ljava/util/Optional;",
-                    shift = At.Shift.BEFORE
-            ),
-            cancellable = true
+        method = "handleMessage(Lnet/minecraft/server/filter/TextStream$Message;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/network/ServerPlayerEntity;updateLastActionTime()V",
+            shift = At.Shift.AFTER
+        ),
+        cancellable = true
     )
-    private void onPlayerChat(ChatMessageC2SPacket packet, CallbackInfo ci) {
+    private void onPlayerChat(TextStream.Message message, CallbackInfo ci) {
         ActionResult result = AuthEventHandler.onPlayerChat(this.player);
         if (result == ActionResult.FAIL) {
             ci.cancel();
@@ -43,7 +43,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
             method = "onPlayerAction(Lnet/minecraft/network/packet/c2s/play/PlayerActionC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true
@@ -62,7 +62,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
             at = @At(
                     value = "INVOKE",
                     // Thanks to Liach for helping me out!
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true
@@ -78,7 +78,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
             method = "onCreativeInventoryAction(Lnet/minecraft/network/packet/c2s/play/CreativeInventoryActionC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true

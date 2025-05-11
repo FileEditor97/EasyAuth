@@ -42,12 +42,9 @@ dependencies {
 
     // Permissions
     modImplementation("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
-    // Provide context for LuckPerms
-    compileOnly "net.luckperms:api:${project.luckperms_version}"
 
     // Mods
     modCompileOnly "org.geysermc.floodgate:api:${floodgate_api_version}"
-    modCompileOnly "maven.modrinth:vanish:${vanish_version}"
 
     // Password hashing
     // Argon2
@@ -131,11 +128,11 @@ modrinth {
     token.set(System.getenv("MODRINTH_TOKEN"))
     projectId.set("aZj58GfX")
     versionNumber.set("${project.version}")
-    versionName = "[1.21.5] ${project.version}"
+    versionName = "[1.18.2] ${project.version}"
     versionType = "release"
     changelog.set("Release notes:\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}\n\nChangelog:\nhttps://github.com/NikitaCartes/EasyAuth/tree/HEAD/CHANGELOG.md")
     uploadFile = remapJar
-    gameVersions.addAll("1.21.5")
+    gameVersions.addAll("1.18.2")
     loaders = ["fabric"]
     dependencies {
         required.project("P7dR8mSH") // Fabric API
@@ -152,12 +149,12 @@ curseforge {
 
         addGameVersion("Fabric")
 
-        addGameVersion("Java 21")
+        addGameVersion("Java 17")
 
-        addGameVersion("1.21.5")
+        addGameVersion("1.18.2")
 
         mainArtifact(remapJar) {
-            displayName = "[1.21.5] ${project.version}"
+            displayName = "[1.18.2] ${project.version}"
             relations {
                 requiredDependency("fabric-api")
                 embeddedLibrary 'server-translation-api'

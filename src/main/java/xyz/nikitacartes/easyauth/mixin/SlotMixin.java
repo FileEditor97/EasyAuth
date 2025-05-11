@@ -22,11 +22,11 @@ public abstract class SlotMixin {
         if (result == ActionResult.FAIL) {
             // Canceling the item taking
             player.networkHandler.sendPacket(
-                    new ScreenHandlerSlotUpdateS2CPacket(
-                            -2,
-                            0,
-                            player.getInventory().getSelectedSlot(),
-                            player.getInventory().getStack(player.getInventory().getSelectedSlot()))
+                new ScreenHandlerSlotUpdateS2CPacket(
+                    -2,
+                    0,
+                    player.getInventory().selectedSlot,
+                    player.getInventory().getStack(player.getInventory().selectedSlot))
             );
             cir.setReturnValue(false);
         }

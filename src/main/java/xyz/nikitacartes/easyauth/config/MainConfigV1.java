@@ -10,7 +10,6 @@ import java.util.Map;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 @ConfigSerializable
 public class MainConfigV1 extends ConfigTemplate {
@@ -24,7 +23,6 @@ public class MainConfigV1 extends ConfigTemplate {
     public boolean enableGlobalPassword = false;
     public boolean singleUseGlobalPassword = false;
     public boolean hidePlayerCoords = false;
-    public boolean vanishUntilAuth = true;
     public boolean debug = false;
     public long configVersion = 2;
     public WorldSpawn worldSpawn = new WorldSpawn();
@@ -63,7 +61,6 @@ public class MainConfigV1 extends ConfigTemplate {
         configValues.put("enableGlobalPassword", wrapIfNecessary(enableGlobalPassword));
         configValues.put("singleUseGlobalPassword", wrapIfNecessary(singleUseGlobalPassword));
         configValues.put("hidePlayerCoords", wrapIfNecessary(hidePlayerCoords));
-        configValues.put("vanishUntilAuth", wrapIfNecessary(vanishUntilAuth));
         configValues.put("worldSpawn.dimension", wrapIfNecessary(worldSpawn.dimension));
         configValues.put("worldSpawn.x", wrapIfNecessary(worldSpawn.x));
         configValues.put("worldSpawn.y", wrapIfNecessary(worldSpawn.y));

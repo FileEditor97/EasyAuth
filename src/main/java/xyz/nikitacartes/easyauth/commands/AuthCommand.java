@@ -2,16 +2,14 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.EasyAuth;
@@ -37,7 +35,7 @@ public class AuthCommand {
     /**
      * Registers the "/auth" command
      *
-     * @param dispatcher
+     * @param dispatcher command dispatcher
      */
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("auth")
@@ -84,8 +82,8 @@ public class AuthCommand {
                                                                 // +1 to not spawn player in ground
                                                                 BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
                                                                 BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ(),
-                                                                RotationArgumentType.getRotation(ctx, "angle").getRotation(ctx.getSource()).y,
-                                                                RotationArgumentType.getRotation(ctx, "angle").getRotation(ctx.getSource()).x
+                                                                RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).y,
+                                                                RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).x
                                                         )
                                                 )
                                         )
@@ -258,9 +256,7 @@ public class AuthCommand {
      * @return 0
      */
     private static int removeAccount(ServerCommandSource source, String username) {
-        THREADPOOL.submit(() -> {
-            DB.deleteUserData(username);
-        });
+        THREADPOOL.submit(() -> DB.deleteUserData(username));
 
         ServerPlayerEntity playerEntity = source.getServer().getPlayerManager().getPlayer(username);
         if (playerEntity != null) {
@@ -330,12 +326,21 @@ public class AuthCommand {
                         return;
                     }
                     i.getAndIncrement();
-                    message.append(Text.translatable(username)
-                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(username)))
+                    message.append(new TranslatableText(username)
+                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, username)))
                             .formatted(Formatting.YELLOW))
                             .append(", ");
                 });
-                source.sendMessage(message);
+                ServerPlayerEntity player = null;
+                try {
+                    player = source.getPlayer();
+                } catch (CommandSyntaxException ignored) {
+                }
+                if (player != null) {
+                    player.sendMessage(message, false);
+                } else {
+                    LogInfo(message.getString());
+                }
             }
         });
         return 1;
@@ -392,7 +397,16 @@ public class AuthCommand {
                 return;
             }
             // Send player information to the source
-            source.sendMessage(Text.literal("Player Info: " + playerData.toJson()));
+            ServerPlayerEntity player = null;
+            try {
+                player = source.getPlayer();
+            } catch (CommandSyntaxException ignored) {
+            }
+            if (player != null) {
+                player.sendMessage(Text.of("Player Info: " + playerData.toJson()), false);
+            } else {
+                LogInfo("Player Info: " + playerData.toJson());
+            }
         });
         return 1;
     }
@@ -404,19 +418,28 @@ public class AuthCommand {
      */
     private static int getOnlinePlayers(ServerCommandSource source) {
         THREADPOOL.submit(() -> {
-            MutableText message = Text.literal("");
+            MutableText message = new LiteralText("");
             source.getServer().getPlayerManager().getPlayerList().forEach(player -> {
-                PlayerEntryV1 playerData = DB.getUserData(player.getNameForScoreboard());
+                PlayerEntryV1 playerData = DB.getUserData(player.getName().toString());
                 PlayerAuth playerAuth = (PlayerAuth) player;
 
-                message.append(Text.translatable(player.getNameForScoreboard()).formatted(Formatting.YELLOW)).append(": ");
+                message.append(new TranslatableText(player.getName().toString()).formatted(Formatting.YELLOW)).append(": ");
                 if (playerData == null) {
-                    message.append(Text.literal("No data found\n"));
+                    message.append(new LiteralText("No data found\n"));
                     return;
                 }
-                message.append(Text.literal("authenticated: " + playerAuth.easyAuth$isAuthenticated() + "; Mojang account: " + playerAuth.easyAuth$isUsingMojangAccount() + "\n"));
+                message.append(new LiteralText("authenticated: " + playerAuth.easyAuth$isAuthenticated() + "; Mojang account: " + playerAuth.easyAuth$isUsingMojangAccount() + "\n"));
             });
-            source.sendMessage(message);
+            ServerPlayerEntity player = null;
+            try {
+                player = source.getPlayer();
+            } catch (CommandSyntaxException ignored) {
+            }
+            if (player != null) {
+                player.sendMessage(message, false);
+            } else {
+                LogInfo(message.getString());
+            }
         });
         return 1;
     }

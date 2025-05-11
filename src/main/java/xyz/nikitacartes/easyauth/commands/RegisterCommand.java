@@ -70,7 +70,7 @@ public class RegisterCommand {
     }
 
     private static int register(ServerCommandSource source, String globalPassword, String pass1, String pass2) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
@@ -81,7 +81,7 @@ public class RegisterCommand {
 
                 playerData.loginTries++;
                 if (playerData.loginTries >= config.maxLoginTries && config.maxLoginTries != -1) { // Player exceeded maxLoginTries
-                    LogRegister("Player " + player.getNameForScoreboard() + " exceeded global password tries limit.");
+                    LogRegister("Player " + player.getName().getString() + " exceeded global password tries limit.");
                     playerData.lastKickedDate = ZonedDateTime.now();
                     playerData.loginTries = 0;
                     playerData.update();
@@ -97,7 +97,7 @@ public class RegisterCommand {
 
     // Method called for hashing the password & writing to DB
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
@@ -137,7 +137,7 @@ public class RegisterCommand {
             playerAuth.easyAuth$setPlayerEntryV1(playerData);
             playerData.update();
 
-            LogRegister("Player " + player.getNameForScoreboard() + "{" + player.getUuidAsString() + "} successfully registered with password: " + playerData.password);
+            LogRegister("Player " + player.getName().getString() + "{" + player.getUuidAsString() + "} successfully registered with password: " + playerData.password);
         });
         return 0;
     }

@@ -2,7 +2,7 @@ package xyz.nikitacartes.easyauth.utils;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Unique;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
@@ -72,7 +72,7 @@ public interface PlayerAuth {
     /**
      * Sets the player's IP address on connection step.
      *
-     * @param ClientConnection connection
+     * @param connection conn
      */
     void easyAuth$setIpAddress(ClientConnection connection);
 
@@ -96,6 +96,4 @@ public interface PlayerAuth {
     void easyAuth$setRidingEntityUUID(UUID ridingEntityUUID);
     boolean easyAuth$wasDead();
     void easyAuth$wasDead(boolean wasDead);
-    boolean easyAuth$wasVanished();
-    void easyAuth$wasVanished(boolean wasVanished);
 }

@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -13,9 +14,8 @@ import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Uuids;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
@@ -23,6 +23,7 @@ import xyz.nikitacartes.easyauth.utils.PlayersCache;
 
 import java.net.SocketAddress;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,7 +96,7 @@ public class AuthEventHandler {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         // Create in case of Carpet player
-        PlayerEntryV1 cache = PlayersCache.getCarpet(player.getNameForScoreboard());
+        PlayerEntryV1 cache = PlayersCache.getCarpet(player.getName().getString());
         boolean update = false;
         if (cache.uuid == null) {
             cache.uuid = player.getUuid();
@@ -180,20 +181,20 @@ public class AuthEventHandler {
         if (player == null) {
             return ActionResult.PASS;
         }
-        if (command.startsWith("login ")
-                || command.startsWith("register ")
-                || (extendedConfig.aliases.login && command.startsWith("l "))
-                || (extendedConfig.aliases.register && command.startsWith("reg "))) {
+        if (command.startsWith("/login ")
+                || command.startsWith("/register ")
+                || (extendedConfig.aliases.login && command.startsWith("/l "))
+                || (extendedConfig.aliases.register && command.startsWith("/reg "))) {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {
             for (String allowedCommand : extendedConfig.allowedCommands) {
                 if (command.startsWith(allowedCommand)) {
-                    LogDebug("Player " + player.getNameForScoreboard() + " executed command " + command + " without being authenticated.");
+                    LogDebug("Player " + player.getName().getString() + " executed command " + command + " without being authenticated.");
                     return ActionResult.PASS;
                 }
             }
-            LogDebug("Player " + player.getNameForScoreboard() + " tried to execute command " + command + " without being authenticated.");
+            LogDebug("Player " + player.getName().getString() + " tried to execute command " + command + " without being authenticated.");
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
@@ -242,13 +243,13 @@ public class AuthEventHandler {
     }
 
     // Using an item
-    public static ActionResult onUseItem(PlayerEntity player) {
+    public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowItemUsing) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return TypedActionResult.fail(ItemStack.EMPTY);
         }
 
-        return ActionResult.PASS;
+        return TypedActionResult.pass(ItemStack.EMPTY);
     }
 
     // Dropping an item
@@ -292,7 +293,8 @@ public class AuthEventHandler {
 
     public static void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, ServerLoginNetworking.LoginSynchronizer sync) {
         if (extendedConfig.forcedOfflineUuid && netHandler.profile != null) {
-            netHandler.profile = Uuids.getOfflinePlayerProfile(netHandler.profile.getName());
+            UUID uUID = PlayerEntity.getOfflinePlayerUuid(netHandler.profile.getName());
+            netHandler.profile = new GameProfile(uUID, netHandler.profile.getName());
         }
     }
 

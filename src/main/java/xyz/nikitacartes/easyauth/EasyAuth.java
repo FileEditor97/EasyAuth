@@ -1,7 +1,7 @@
 package xyz.nikitacartes.easyauth;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
@@ -12,9 +12,7 @@ import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
-import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.database.*;
-import xyz.nikitacartes.easyauth.utils.LuckPermsIntegration;
 
 import java.io.File;
 import java.io.FileReader;
@@ -77,7 +75,7 @@ public class EasyAuth implements ModInitializer {
         }
 
         // Registering the commands
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             RegisterCommand.registerCommand(dispatcher);
             LoginCommand.registerCommand(dispatcher);
             LogoutCommand.registerCommand(dispatcher);
@@ -95,7 +93,7 @@ public class EasyAuth implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
 
-        Identifier earlyPhase = Identifier.of("easyauth", "early");
+        Identifier earlyPhase = new Identifier("easyauth", "early");
         ServerLoginConnectionEvents.QUERY_START.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerLoginConnectionEvents.QUERY_START.register(earlyPhase, AuthEventHandler::onPreLogin);
     }
@@ -113,14 +111,6 @@ public class EasyAuth implements ModInitializer {
         if (DB.isClosed()) {
             LogError("Couldn't connect to database. Stopping server");
             server.stop(false);
-        }
-
-        // Register LuckPerms integration if it's loaded
-        if (technicalConfig.luckPermsLoaded) {
-            LuckPermsIntegration.register();
-        }
-        if (technicalConfig.vanishLoaded) {
-            VanishIntegration.listenJoinEvent();
         }
     }
 

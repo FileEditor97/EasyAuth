@@ -7,7 +7,7 @@
     "EntityMixin",
     "PlayerAdvancementTrackerMixin",
     "PlayerManagerMixin",
-    "PlayerSaveHandlerMixin",
+    "WorldSaveHandlerMixin",
     "ServerLoginNetworkHandlerMixin",
     "ServerPlayerEntity$1Mixin",
     "ServerPlayerEntityMixin",

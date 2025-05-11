@@ -6,6 +6,7 @@ import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -128,12 +129,12 @@ public abstract class ConfigTemplate {
         }
 
         @Override
-        public TranslatableText deserialize(Type type, ConfigurationNode node) throws SerializationException {
+        public TranslatableText deserialize(@Nonnull Type type, ConfigurationNode node) throws SerializationException {
             final String text = node.node(TEXT).getString("");
             final boolean enabled = node.node(ENABLED).getBoolean(true);
             final boolean serverSide = node.node(SERVER_SIDE).getBoolean(true);
 
-            if (text == null || text.isEmpty()) {
+            if (text.isEmpty()) {
                 return new TranslatableText("text.easyauth." + camelCase(node.key()), "", false, serverSide);
             }
 
@@ -141,7 +142,7 @@ public abstract class ConfigTemplate {
         }
 
         @Override
-        public void serialize(Type type, @Nullable TranslatableText obj, ConfigurationNode node) throws SerializationException {
+        public void serialize(@Nonnull Type type, @Nullable TranslatableText obj, @Nonnull ConfigurationNode node) throws SerializationException {
             if (obj == null || obj.fallback.isEmpty()) {
                 node.node(TEXT).set("");
                 node.node(ENABLED).set(false);
