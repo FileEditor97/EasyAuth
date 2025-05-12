@@ -33,7 +33,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
         cancellable = true
     )
     private void onPlayerChat(TextStream.Message message, CallbackInfo ci) {
-        ActionResult result = AuthEventHandler.onPlayerChat(this.player);
+        ActionResult result = AuthEventHandler.onPlayerChat(this.player, message.getFiltered());
         if (result == ActionResult.FAIL) {
             ci.cancel();
         }
